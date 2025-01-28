@@ -12,14 +12,27 @@ dependencies = [
     "pyperclip>=1.9.0",
     "python-dotenv>=1.0.1",
     "rich>=13.9.4",
+    "flask>=3.0.0",
 ]
 
 [project.scripts]
 rat = "rat.rat:main"
+rat-web = "web.app:app.run"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["rat"]
+packages = ["rat", "web"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --cov=rat --cov-report=term-missing"

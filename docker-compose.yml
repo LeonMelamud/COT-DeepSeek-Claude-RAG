@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+
+  rat-cli:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    stdin_open: true  # Keep STDIN open for interactive CLI
+    tty: true        # Allocate a pseudo-TTY for terminal input
+    entrypoint: ["python", "rat_claude.py"]
+
+  rat-web:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_APP=web.app
+      - FLASK_ENV=development
+    entrypoint: ["python", "-m", "flask", "run", "--host=0.0.0.0", "--debug", "--reload"]

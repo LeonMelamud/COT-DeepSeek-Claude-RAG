@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAT - Retrieval Augmented Thinking</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        .collapse-enter-active,
+        .collapse-leave-active {
+            transition: all 0.3s ease-in-out;
+            overflow: hidden;
+        }
+        .collapse-enter-from,
+        .collapse-leave-to {
+            opacity: 0;
+            max-height: 0px;
+        }
+        .collapse-enter-to,
+        .collapse-leave-from {
+            opacity: 1;
+            max-height: 1000px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="app" class="container mx-auto px-4 py-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">🧠 RAT</h1>
+            <p class="text-gray-600">Retrieval Augmented Thinking</p>
+        </header>
+
+        <div class="grid grid-cols-1 gap-8">
+            <!-- Environment Keys Section -->
+            <div class="bg-white rounded-lg shadow-md p-4">
+                <div class="flex justify-between items-center cursor-pointer" @click="toggleEnvKeys">
+                    <h2 class="text-2xl font-semibold">Environment Keys</h2>
+                    <span class="text-gray-500 transform transition-transform" :class="{ 'rotate-90': !showEnvKeys }">▼</span>
+                </div>
+                <transition name="collapse">
+                    <div v-show="showEnvKeys" class="mt-4">
+                        <!-- API Mode Selection -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">API Mode</label>
+                            <div class="mb-2 text-sm text-gray-600">
+                                Select which API combination to use for analysis:
+                                <ul class="list-disc ml-4 mt-1">
+                                    <li>OpenRouter mode uses DeepSeek for reasoning and OpenRouter for response</li>
+                                    <li>Claude mode uses DeepSeek for reasoning and Claude for response</li>
+                                </ul>
+                            </div>
+                            <div class="flex gap-4">
+                                <button 
+                                    @click="apiMode = 'openrouter'"
+                                    :class="{'bg-blue-500 text-white': apiMode === 'openrouter', 'bg-gray-200': apiMode !== 'openrouter'}"
+                                    class="px-4 py-2 rounded transition-colors">
+                                    DeepSeek + OpenRouter
+                                </button>
+                                <button 
+                                    @click="apiMode = 'claude'"
+                                    :class="{'bg-blue-500 text-white': apiMode === 'claude', 'bg-gray-200': apiMode !== 'claude'}"
+                                    class="px-4 py-2 rounded transition-colors">
+                                    DeepSeek + Claude
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- API Keys List -->
+                        <div class="space-y-4">
+                            <!-- DeepSeek Key (Always Required) -->
+                            <div class="border rounded p-4" :class="{'border-red-500': env.DEEPSEEK_API_KEY?.isValid === false}">
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="text-sm font-medium text-gray-700">DeepSeek API Key (Required)</label>
+                                    <span v-if="env.DEEPSEEK_API_KEY?.isValid === false" class="text-red-500 text-sm">Invalid Key</span>
+                                    <span v-else-if="env.DEEPSEEK_API_KEY?.isValid === true" class="text-green-500 text-sm">Valid</span>
+                                </div>
+                                <input 
+                                    type="password" 
+                                    v-model="keyValues.DEEPSEEK_API_KEY"
+                                    class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Enter DeepSeek API Key">
+                            </div>
+
+                            <!-- OpenRouter Key (Required for OpenRouter mode) -->
+                            <div v-if="apiMode === 'openrouter'" class="border rounded p-4" :class="{'border-red-500': env.OPENROUTER_API_KEY?.isValid === false}">
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="text-sm font-medium text-gray-700">OpenRouter API Key (Required for OpenRouter mode)</label>
+                                    <span v-if="env.OPENROUTER_API_KEY?.isValid === false" class="text-red-500 text-sm">Invalid Key</span>
+                                    <span v-else-if="env.OPENROUTER_API_KEY?.isValid === true" class="text-green-500 text-sm">Valid</span>
+                                </div>
+                                <input 
+                                    type="password" 
+                                    v-model="keyValues.OPENROUTER_API_KEY"
+                                    class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Enter OpenRouter API Key">
+                            </div>
+
+                            <!-- Claude Key (Required for Claude mode) -->
+                            <div v-if="apiMode === 'claude'" class="border rounded p-4" :class="{'border-red-500': env.ANTHROPIC_API_KEY?.isValid === false}">
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="text-sm font-medium text-gray-700">Claude API Key</label>
+                                    <span v-if="env.ANTHROPIC_API_KEY?.isValid === false" class="text-red-500 text-sm">Invalid Key</span>
+                                    <span v-else-if="env.ANTHROPIC_API_KEY?.isValid === true" class="text-green-500 text-sm">Valid</span>
+                                </div>
+                                <input 
+                                    type="password" 
+                                    v-model="keyValues.ANTHROPIC_API_KEY"
+                                    class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Enter Claude API Key">
+                            </div>
+                        </div>
+
+                        <button 
+                            @click="saveEnv"
+                            class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors mt-4">
+                            Save Keys
+                        </button>
+                    </div>
+                </transition>
+            </div>
+
+            <!-- File Analysis Section -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex justify-between items-center cursor-pointer" @click="toggleFileAnalysis">
+                    <h2 class="text-2xl font-semibold">File Analysis</h2>
+                    <span class="text-gray-500 transform transition-transform" :class="{ 'rotate-90': !showFileAnalysis }">▼</span>
+                </div>
+                <transition name="collapse">
+                    <div v-show="showFileAnalysis" class="space-y-4 mt-4">
+                        <div>
+                            <div class="mb-4">
+                                <h3 class="text-sm font-medium text-gray-700 mb-2">Models Used</h3>
+                                <div class="text-sm text-gray-600">
+                                    <p class="mb-2">For Reasoning (both modes):</p>
+                                    <ul class="list-disc ml-4 mb-2">
+                                        <li>DeepSeek Reasoner (deepseek-reasoner)</li>
+                                    </ul>
+                                    <p class="mb-2">For Response:</p>
+                                    <ul class="list-disc ml-4">
+                                        <li v-if="apiMode === 'openrouter'">GPT-4-mini (openai/gpt-4o-mini)</li>
+                                        <li v-if="apiMode === 'claude'">Claude 3 Sonnet (claude-3-5-sonnet-20241022)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Upload File
+                            </label>
+                            <input 
+                                type="file"
+                                @change="handleFileUpload"
+                                class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <button 
+                            @click="processFile"
+                            :disabled="!selectedFile"
+                            :class="{'opacity-50 cursor-not-allowed': !selectedFile}"
+                            class="w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition-colors">
+                            Analyze File
+                        </button>
+                    </div>
+                </transition>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div v-if="result" class="mt-8 bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-semibold mb-4">Analysis Results</h2>
+            <!-- Error Display -->
+            <div v-if="result.error" class="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+                <strong class="font-bold">Error: </strong>
+                <span class="block sm:inline" v-text="result.error"></span>
+            </div>
+            <!-- Success Results -->
+            <div v-else class="space-y-4">
+                <div v-if="result.reasoning">
+                    <h3 class="text-lg font-medium text-gray-700 mb-2">Reasoning Process</h3>
+                    <pre class="bg-gray-50 p-4 rounded overflow-auto max-h-60">{{ result.reasoning }}</pre>
+                </div>
+                <div v-if="result.response">
+                    <h3 class="text-lg font-medium text-gray-700 mb-2">Final Response</h3>
+                    <pre class="bg-gray-50 p-4 rounded overflow-auto max-h-60">{{ result.response }}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue
+
+        createApp({
+            data() {
+                return {
+                    env: {
+                        DEEPSEEK_API_KEY: { value: '', isValid: null },
+                        OPENROUTER_API_KEY: { value: '', isValid: null },
+                        ANTHROPIC_API_KEY: { value: '', isValid: null }
+                    },
+                    keyValues: {
+                        DEEPSEEK_API_KEY: '',
+                        OPENROUTER_API_KEY: '',
+                        ANTHROPIC_API_KEY: ''
+                    },
+                    apiMode: 'openrouter',
+                    selectedFile: null,
+                    result: null,
+                    showEnvKeys: false,
+                    showFileAnalysis: true
+                }
+            },
+            mounted() {
+                this.loadEnv()
+            },
+            methods: {
+                toggleEnvKeys() {
+                    this.showEnvKeys = !this.showEnvKeys
+                },
+                toggleFileAnalysis() {
+                    this.showFileAnalysis = !this.showFileAnalysis
+                },
+                async loadEnv() {
+                    const response = await fetch('/api/env')
+                    const data = await response.json()
+                    // Update validation status
+                    Object.keys(data).forEach(key => {
+                        this.env[key] = {
+                            value: '', // Reset value since it's not used
+                            isValid: data[key].isValid
+                        }
+                    })
+                },
+                async saveEnv() {
+                    // Convert env object to simple key-value pairs
+                    const envData = Object.entries(this.keyValues).reduce((acc, [key, value]) => {
+                        if (value && value.trim()) {
+                            acc[key] = value.trim();
+                        }
+                        return acc;
+                    }, {});
+
+                    const response = await fetch('/api/env', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(envData)
+                    });
+
+                    if (response.ok) {
+                        // Clear key values after successful save
+                        Object.keys(this.keyValues).forEach(key => {
+                            this.keyValues[key] = '';
+                        });
+                        await this.loadEnv(); // Reload to get updated validation status
+                    }
+                },
+                handleFileUpload(event) {
+                    this.selectedFile = event.target.files[0]
+                },
+                async processFile() {
+                    // Check required keys based on mode using existing validation flags
+                    if (this.env.DEEPSEEK_API_KEY?.isValid === false || 
+                        (this.apiMode === 'openrouter' && this.env.OPENROUTER_API_KEY?.isValid === false) ||
+                        (this.apiMode === 'claude' && this.env.ANTHROPIC_API_KEY?.isValid === false)) {
+                        this.result = { error: 'Please ensure all required API keys are valid in Environment Keys section' }
+                        return
+                    }
+
+                    if (!this.selectedFile) {
+                        this.result = { error: 'Please select a file to analyze' }
+                        return
+                    }
+
+                    const formData = new FormData()
+                    formData.append('file', this.selectedFile)
+
+                    try {
+                        const response = await fetch(`/api/rag?mode=${this.apiMode}`, {
+                            method: 'POST',
+                            body: formData
+                        })
+
+                        const data = await response.json()
+                        if (response.ok) {
+                            this.result = data
+                        } else {
+                            this.result = { error: data.error || 'An error occurred during analysis' }
+                        }
+                    } catch (error) {
+                        this.result = { error: 'Network error occurred while processing the file' }
+                    }
+                }
+            }
+        }).mount('#app')
+    </script>
+</body>
+</html>

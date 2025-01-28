@@ -1,0 +1,23 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy necessary files for installation
+COPY pyproject.toml README.md ./
+
+# Copy the application code and tests
+COPY rat/ rat/
+COPY web/ web/
+COPY rat_claude.py .
+COPY tests/ tests/
+
+# Install the package with test dependencies
+RUN pip install --no-cache-dir ".[dev]"
+
+# Command to run tests
+CMD ["pytest", "-v", "--cov=rat", "--cov-report=term-missing"]

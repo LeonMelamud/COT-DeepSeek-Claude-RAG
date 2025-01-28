@@ -40,8 +40,8 @@ Standalone installation
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/Doriandarko/RAT-retrieval-augmented-thinking.git
-   cd RAT-retrieval-augmented-thinking
+   git clone https://github.com/LeonMelamud/COT-DeepSeek-Claude-RAG.git
+   cd COT-DeepSeek-Claude-RAG
    ```
 
 
@@ -51,6 +51,58 @@ Standalone installation
    ```
 
 This will install RAT as a command-line tool, allowing you to run it from anywhere by simply typing `rat`!
+
+## 🐳 Docker Usage
+
+Requirements:
+- Docker 20.10.0 or higher
+- Docker Compose V2
+
+You can run RAT using Docker in three different modes:
+
+1. CLI Mode:
+   ```bash
+   docker compose up rat-cli
+   ```
+   This runs the interactive CLI version of RAT.
+
+2. Web Interface:
+   ```bash
+   docker compose up rat-web
+   ```
+   This starts the web server at http://localhost:5000.
+
+3. Test Mode:
+   ```bash
+   docker compose up test
+   ```
+   This runs the test suite.
+
+Each mode will automatically build the Docker image if it doesn't exist.
+
+## 🌐 Web Interface
+
+RAT includes a web interface that provides:
+- File upload and analysis capabilities (files are temporarily stored in an 'uploads' directory)
+- API key management
+- Support for both OpenRouter and Claude modes
+- Visual display of AI reasoning and responses
+
+To use the web interface:
+
+1. Start the web server:
+   ```bash
+   # Either using Python directly:
+   python -m flask --app web.app run --debug
+
+   # Or using Docker:
+   docker compose up rat-web
+   ```
+
+2. Open http://localhost:5000 in your browser
+3. Configure your API keys if not already set
+4. Upload a file for analysis
+5. View the AI's reasoning and response
 
 ## 📖 Usage
 
@@ -109,12 +161,11 @@ This project is available under the MIT License. See the [LICENSE](LICENSE) file
 If you use this codebase in your projects, please include appropriate credits:
 
 ```plaintext
-This project uses RAT (Retrieval Augmented Thinking) by Skirano
-GitHub: https://github.com/yourusername/rat
+This project uses RAT (Retrieval Augmented Thinking)
+GitHub: https://github.com/LeonMelamud/COT-DeepSeek-Claude-RAG
 ```
 ---
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=Doriandarko/RAT-retrieval-augmented-thinking&type=Date)](https://star-history.com/#Doriandarko/RAT-retrieval-augmented-thinking&Date)
-
+[![Star History Chart](https://api.star-history.com/svg?repos=LeonMelamud/COT-DeepSeek-Claude-RAG&type=Date)](https://star-history.com/#LeonMelamud/COT-DeepSeek-Claude-RAG&Date)

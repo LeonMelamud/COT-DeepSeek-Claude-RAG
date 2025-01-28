@@ -17,23 +17,42 @@ OPENROUTER_MODEL = "openai/gpt-4o-mini"
 load_dotenv()
 
 class ModelChain:
+    def validate_deepseek_key(self):
+        key = os.getenv("DEEPSEEK_API_KEY")
+        if not key or key == "your_deepseek_api_key_here":
+            raise ValueError("Invalid or missing DEEPSEEK_API_KEY in .env file")
+        return key
+
+    def validate_openrouter_key(self):
+        key = os.getenv("OPENROUTER_API_KEY")
+        if not key or key == "your_openrouter_api_key_here":
+            raise ValueError("Invalid or missing OPENROUTER_API_KEY in .env file")
+        return key
+
     def __init__(self):
-        # Initialize DeepSeek client
-        self.deepseek_client = OpenAI(
-            api_key=os.getenv("DEEPSEEK_API_KEY"),
-            base_url="https://api.deepseek.com"
-        )
-        
-        # Initialize OpenRouter client
-        self.openrouter_client = OpenAI(
-            base_url="https://openrouter.ai/api/v1",
-            api_key=os.getenv("OPENROUTER_API_KEY")
-        )
-        
-        self.deepseek_messages = []
-        self.openrouter_messages = []  # New: Add message history for OpenRouter
-        self.current_model = OPENROUTER_MODEL
-        self.show_reasoning = True  # New flag to track reasoning visibility
+        try:
+            # Validate and get API keys
+            deepseek_key = self.validate_deepseek_key()
+            openrouter_key = self.validate_openrouter_key()
+            
+            # Initialize DeepSeek client
+            self.deepseek_client = OpenAI(
+                api_key=deepseek_key,
+                base_url="https://api.deepseek.com"
+            )
+            
+            # Initialize OpenRouter client
+            self.openrouter_client = OpenAI(
+                base_url="https://openrouter.ai/api/v1",
+                api_key=openrouter_key
+            )
+            
+            self.deepseek_messages = []
+            self.openrouter_messages = []
+            self.current_model = OPENROUTER_MODEL
+            self.show_reasoning = True
+        except ValueError as e:
+            raise ValueError(f"API Key Validation Error: {str(e)}")
 
     def set_model(self, model_name):
         self.current_model = model_name
