@@ -1,4 +1,4 @@
-# 🧠 RAT (Retrieval Augmented Thinking)
+# 🧠 RAT (Retrieval Augmented Thinking) With UI
 
 > *Enhancing AI responses through structured reasoning and knowledge retrieval*
 
@@ -10,11 +10,17 @@ The idea for RAT was taken from [Doriandarko's RAT project](https://github.com/D
 
 ## How It Works
 
-RAT employs a two-stage approach:
-1. **Reasoning Stage** (DeepSeek): Generates detailed reasoning and analysis for each query
-2. **Response Stage** (OpenRouter): Utilizes the reasoning context to provide informed, well-structured answers
+RAT employs a two-stage approach in both its implementations:
 
-This approach ensures more thoughtful, contextually aware, and reliable responses.
+1. **Reasoning Stage** (DeepSeek): 
+   - Uses DeepSeek-Reasoner to generate detailed reasoning and analysis for each query
+   - This stage is consistent across both implementations
+
+2. **Response Stage** (Two Options):
+   - **Standard Version** (OpenRouter): Uses OpenRouter models to generate responses
+   - **Claude Version** (Optional): Uses Claude models with message prefilling capabilities
+
+This dual-stage approach ensures thoughtful, contextually aware, and reliable responses regardless of which response model you choose to use.
 
 ## 🎯 Features
 
@@ -27,9 +33,13 @@ This approach ensures more thoughtful, contextually aware, and reliable response
 • Python 3.11 or higher  
 • A .env file containing:
   ```plaintext
+  # Required for both implementations
   DEEPSEEK_API_KEY=your_deepseek_api_key_here
+  
+  # Required for standard version (OpenRouter)
   OPENROUTER_API_KEY=your_openrouter_api_key_here
-  optional
+  
+  # Optional - only needed if using Claude version
   ANTHROPIC_API_KEY=your_anthropic_api_key_here
   ```
 
@@ -104,11 +114,15 @@ To use the web interface:
 
 ## 📖 Usage
 
-1. Ensure your .env file is configured with:
+1. Ensure your .env file is configured with the necessary API keys:
    ```plaintext
+   # Required for both implementations
    DEEPSEEK_API_KEY=your_deepseek_api_key_here
+   
+   # Required for standard version (OpenRouter)
    OPENROUTER_API_KEY=your_openrouter_api_key_here
-   optional
+   
+   # Optional - only needed if using Claude version
    ANTHROPIC_API_KEY=your_anthropic_api_key_here 
    ```
 
