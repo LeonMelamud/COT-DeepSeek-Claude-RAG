@@ -6,9 +6,7 @@ RAT is a powerful tool that improves AI responses by leveraging DeepSeek's reaso
 
 ## 💡 Origin & Ideation
 
-The idea for RAT emerged from an interesting discovery about DeepSeek-R1 API capabilities. By setting the final response token to 1 while retrieving the thinking process, it became possible to separate the reasoning stage from the final response generation. This insight led to the development of a two-stage approach that combines DeepSeek's exceptional reasoning abilities with various response models.
-
-Link to my original concept in this [Twitter thread](https://x.com/skirano/status/1881922469411643413).
+The idea for RAT was taken from [Doriandarko's RAT project](https://github.com/Doriandarko/RAT-retrieval-augmented-thinking), which emerged from an interesting discovery about DeepSeek-R1 API capabilities. By setting the final response token to 1 while retrieving the thinking process, it became possible to separate the reasoning stage from the final response generation. This insight led to the development of a two-stage approach that combines DeepSeek's exceptional reasoning abilities with various response models.
 
 ## How It Works
 
